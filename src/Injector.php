@@ -33,7 +33,7 @@ class Injector implements InjectorInterface
      */
     public static function getInstance(): self
     {
-        if (self::$instance == null) {
+        if (is_null(self::$instance)) {
             self::$instance = new static();
         }
 
@@ -123,7 +123,7 @@ class Injector implements InjectorInterface
         foreach ($constructorParameters as $parameter) {
             $paramClass = $parameter->getClass();
 
-            if ($paramClass == null) {
+            if (is_null($paramClass)) {
                 break;
             }
 
@@ -161,14 +161,10 @@ class Injector implements InjectorInterface
 
     /**
      * @param string $className
-     * @return null
+     * @return object|null
      */
     private function getCachedSingleton(string $className)
     {
-        if (array_key_exists($className, $this->cachedSingletons)) {
-            return $this->cachedSingletons[$className];
-        }
-
-        return null;
+        return $this->cachedSingletons[$className] ?? null;
     }
 }
