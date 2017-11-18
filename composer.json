@@ -1,6 +1,7 @@
 {
     "name": "pkerrigan/di",
     "description": "A lightweight dependency injector",
+    "keywords": ["container", "di", "dependency injection", "injector", "psr11"],
     "type": "library",
     "license": "BSD-3-Clause",
     "authors": [
