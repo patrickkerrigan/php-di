@@ -1,0 +1,20 @@
+language: php
+
+php:
+  - 7.1
+  - 7.2
+
+before_script:
+  - composer require codeclimate/php-test-reporter:dev-master --dev
+  - composer install
+
+script:
+  - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+  - vendor/bin/test-reporter
+
+addons:
+  code_climate:
+    repo_token:
+      secure: mpp2mso5cCMSEY4XTP/l9LpBQXU/9PqcFwMebztOonmZD8wMPdc6Ksu7E8e1S2afxv9pi0KRdniH5ntgRa/hf0EV7cYJdXtP25f45Jqg9nWLcGxCrpJWu5NVEDRd0Ccisz0ndhd2te+hXxEQ6PVhNJfG3/5l8DygMF2gZoxG/7CXRVHX29w5Cufy2I8yv175TleLtVLi4MCNYl/Je2mD2xsHgme8l126EsKvXJXsvyx28Nd6uZPIOKpnxwhgBDYTh1X5DzpWHsnP2joBCCbdbcjPmVeqe2UCUS5KMmI0csJYaNLs4phNgF6Ikk7dvxHONI6b/BFvn6XKODwoPnKTkcF6Kg8YF3HFt4zwHXI84z9VWRJn6pdXPG9TmzjMs9nL34Aybg17LYxflAEE/AYoeyH7qDGHXHuD439dQo4my8/F0wk5QbpLraEPf6M/6Zfr2nerCCLy+Fu0TUe9ABuCR56/cqN0eXG1dxhYur7nLU9gpTZyzMpL4dd4hBp6BK/NfzzJRIyVjk6keZyYUuWVI3x9fwCsuy4r1+tfrbsG51F8ZKH3Iwe42aW4Meh1VascfW9/wOEfsWaLRamwqCEWK57MDUYmbp4Efow9u4xTUFFfgVVSGwNluaRmEaXLsabQYI4UFNckD/0fmFOfSVVCbiPLDL/xCGsmHoCPHqQObPU=
