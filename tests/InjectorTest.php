@@ -23,9 +23,27 @@ class InjectorTest extends TestCase
 
     /**
      * @test
+     */
+    public function GivenInjector_WhenHasCalledWithUnknownClass_ReturnsFalse()
+    {
+        $injector = new Injector();
+        $this->assertFalse($injector->has('TestInterface'));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenHasCalledWithKnownClass_ReturnsTrue()
+    {
+        $injector = new Injector();
+        $this->assertTrue($injector->has(InjectorInterface::class));
+    }
+
+    /**
+     * @test
      * @expectedException \Pkerrigan\Di\Exception\NotFoundException
      */
-    public function GivenInjector_WhenInstantiateCalledWithUnknownClass_ThrowsNotFoundException()
+    public function GivenInjector_WhenGetCalledWithUnknownClass_ThrowsNotFoundException()
     {
         $injector = new Injector();
         $injector->get('TestInterface');
@@ -35,7 +53,7 @@ class InjectorTest extends TestCase
      * @test
      * @expectedException \Pkerrigan\Di\Exception\InstantiationException
      */
-    public function GivenInjector_WhenInstantiateCalledWithAbstractClass_ThrowsInstantiationException()
+    public function GivenInjector_WhenGetCalledWithAbstractClass_ThrowsInstantiationException()
     {
         $injector = new Injector();
         $injector->get(AbstractClass::class);
@@ -44,7 +62,7 @@ class InjectorTest extends TestCase
     /**
      * @test
      */
-    public function GivenInjector_WhenInstantiateCalledOnClassWithNoConstructor_InstantiatesClass()
+    public function GivenInjector_WhenGetCalledOnClassWithNoConstructor_InstantiatesClass()
     {
         $injector = new Injector();
         $this->assertInstanceOf(ClassWithNoConstructor::class, $injector->get(ClassWithNoConstructor::class));
@@ -53,7 +71,7 @@ class InjectorTest extends TestCase
     /**
      * @test
      */
-    public function GivenInjector_WhenInstantiateCalledOnClassWithConstructor_InstantiatesClass()
+    public function GivenInjector_WhenGetCalledOnClassWithConstructor_InstantiatesClass()
     {
         $injector = new Injector();
         $this->assertInstanceOf(ClassWithConstructor::class, $injector->get(ClassWithConstructor::class));
@@ -62,7 +80,7 @@ class InjectorTest extends TestCase
     /**
      * @test
      */
-    public function GivenInjector_WhenInstantiateCalledOnClassWithDependency_InstantiatesClassWithDependency()
+    public function GivenInjector_WhenGetCalledOnClassWithDependency_InstantiatesClassWithDependency()
     {
         $injector = new Injector();
         $classWithDependency = $injector->get(ClassWithDependency::class);
