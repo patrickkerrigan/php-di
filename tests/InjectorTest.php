@@ -1,0 +1,106 @@
+<?php
+
+namespace Pkerrigan\Di;
+
+use PHPUnit\Framework\TestCase;
+use Pkerrigan\Di\ResolvedClass\Prototype;
+use Pkerrigan\Di\ResolvedClass\Singleton;
+use Pkerrigan\Di\Resolver\ArrayMapClassResolver;
+
+class InjectorTest extends TestCase
+{
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenGetInstanceCalled_ReturnsSingletonInstance()
+    {
+        $instance = Injector::getInstance();
+        $instance2 = Injector::getInstance();
+
+        $this->assertInstanceOf(Injector::class, $instance);
+        $this->assertEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+
+    /**
+     * @test
+     * @expectedException \Pkerrigan\Di\Exception\NotFoundException
+     */
+    public function GivenInjector_WhenInstantiateCalledWithUnknownClass_ThrowsNotFoundException()
+    {
+        $injector = new Injector();
+        $injector->get('TestInterface');
+    }
+
+    /**
+     * @test
+     * @expectedException \Pkerrigan\Di\Exception\InstantiationException
+     */
+    public function GivenInjector_WhenInstantiateCalledWithAbstractClass_ThrowsInstantiationException()
+    {
+        $injector = new Injector();
+        $injector->get(AbstractClass::class);
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenInstantiateCalledOnClassWithNoConstructor_InstantiatesClass()
+    {
+        $injector = new Injector();
+        $this->assertInstanceOf(ClassWithNoConstructor::class, $injector->get(ClassWithNoConstructor::class));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenInstantiateCalledOnClassWithConstructor_InstantiatesClass()
+    {
+        $injector = new Injector();
+        $this->assertInstanceOf(ClassWithConstructor::class, $injector->get(ClassWithConstructor::class));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenInstantiateCalledOnClassWithDependency_InstantiatesClassWithDependency()
+    {
+        $injector = new Injector();
+        $classWithDependency = $injector->get(ClassWithDependency::class);
+        $this->assertInstanceOf(ClassWithDependency::class, $classWithDependency);
+        $this->assertInstanceOf(Dependency::class, $classWithDependency->dependency);
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenGetInstanceCalledForSingleton_ReturnsSingletonInstance()
+    {
+        $injector = new Injector();
+        $injector->addClassResolver(new ArrayMapClassResolver([
+            ClassWithNoConstructor::class => new Singleton(ClassWithNoConstructor::class)
+        ]));
+
+        $instance = $injector->get(ClassWithNoConstructor::class);
+        $instance2 = $injector->get(ClassWithNoConstructor::class);
+
+        $this->assertInstanceOf(ClassWithNoConstructor::class, $instance);
+        $this->assertEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenGetInstanceCalledForPrototype_ReturnsPrototypeInstance()
+    {
+        $injector = new Injector();
+        $injector->addClassResolver(new ArrayMapClassResolver([
+            ClassWithNoConstructor::class => new Prototype(ClassWithNoConstructor::class)
+        ]));
+
+        $instance = $injector->get(ClassWithNoConstructor::class);
+        $instance2 = $injector->get(ClassWithNoConstructor::class);
+
+        $this->assertInstanceOf(ClassWithNoConstructor::class, $instance);
+        $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+}

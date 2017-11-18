@@ -1,0 +1,32 @@
+{
+    "name": "pkerrigan/di",
+    "description": "A lightweight dependency injector",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Patrick Kerrigan",
+            "homepage": "https://patrickkerrigan.uk/"
+        }
+    ],
+
+    "provide": {
+        "psr/container-implementation": "1.0.0"
+    },
+
+    "require": {
+        "psr/container": "^1.0"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    },
+
+    "autoload": {
+        "psr-4": {"Pkerrigan\\Di\\": "src/"}
+    },
+
+    "autoload-dev": {
+        "psr-4": {"Pkerrigan\\Di\\": "tests/"}
+    }
+}
