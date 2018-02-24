@@ -77,7 +77,7 @@ class Injector implements InjectorInterface
             return $singleton;
         }
 
-        return $this->constructNewInstance($resolvedClass);
+        return $this->getNewInstance($resolvedClass);
     }
 
     /**
@@ -137,23 +137,14 @@ class Injector implements InjectorInterface
      * @param ResolvedClass $resolvedClass
      * @return object
      */
-    private function constructNewInstance(ResolvedClass $resolvedClass)
+    private function getNewInstance(ResolvedClass $resolvedClass)
     {
+        if (!is_null($factoryMethod = $resolvedClass->getFactoryMethod())) {
+            return $this->get($resolvedClass->getClassName())->{$factoryMethod}();
+        }
+
         try {
-            $reflectionClass = new ReflectionClass($resolvedClass->getClassName());
-
-            if (!$reflectionClass->isInstantiable()) {
-                throw new InstantiationException("Unable to instantiate class '{$resolvedClass->getClassName()}'");
-            }
-
-            $dependencies = $this->constructDependencies($reflectionClass);
-
-            $instance = $reflectionClass->newInstanceArgs($dependencies);
-            if ($resolvedClass->shouldBeCached()) {
-                $this->cachedSingletons[$resolvedClass->getClassName()] = $instance;
-            }
-
-            return $instance;
+            return $this->construct($resolvedClass);
         } catch (ReflectionException $e) {
             throw new InstantiationException("Unable to load class '{$resolvedClass->getClassName()}'");
         }
@@ -166,5 +157,28 @@ class Injector implements InjectorInterface
     private function getCachedSingleton(string $className)
     {
         return $this->cachedSingletons[$className] ?? null;
+    }
+
+    /**
+     * @param ResolvedClass $resolvedClass
+     * @return object
+     * @throws ReflectionException
+     */
+    private function construct(ResolvedClass $resolvedClass): object
+    {
+        $reflectionClass = new ReflectionClass($resolvedClass->getClassName());
+
+        if (!$reflectionClass->isInstantiable()) {
+            throw new InstantiationException("Unable to instantiate class '{$resolvedClass->getClassName()}'");
+        }
+
+        $dependencies = $this->constructDependencies($reflectionClass);
+
+        $instance = $reflectionClass->newInstanceArgs($dependencies);
+        if ($resolvedClass->shouldBeCached()) {
+            $this->cachedSingletons[$resolvedClass->getClassName()] = $instance;
+        }
+
+        return $instance;
     }
 }

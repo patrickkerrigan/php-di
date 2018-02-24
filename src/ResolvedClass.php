@@ -21,4 +21,10 @@ interface ResolvedClass
      * @return bool
      */
     public function shouldBeCached(): bool;
+
+    /**
+     * Get the method to call on this class to return a real instance
+     * @return null|string
+     */
+    public function getFactoryMethod(): ?string;
 }

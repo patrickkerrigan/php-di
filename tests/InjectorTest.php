@@ -3,6 +3,7 @@
 namespace Pkerrigan\Di;
 
 use PHPUnit\Framework\TestCase;
+use Pkerrigan\Di\ResolvedClass\Factory;
 use Pkerrigan\Di\ResolvedClass\Prototype;
 use Pkerrigan\Di\ResolvedClass\Singleton;
 use Pkerrigan\Di\Resolver\ArrayMapClassResolver;
@@ -119,6 +120,40 @@ class InjectorTest extends TestCase
         $instance2 = $injector->get(ClassWithNoConstructor::class);
 
         $this->assertInstanceOf(ClassWithNoConstructor::class, $instance);
+        $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenGetInstanceCalledForFactory_ReturnsObjectFromFactory()
+    {
+        $injector = new Injector();
+        $injector->addClassResolver(new ArrayMapClassResolver([
+            ClassWithNoConstructor::class => new Factory(ObjectFactory::class)
+        ]));
+
+        $instance = $injector->get(ClassWithNoConstructor::class);
+        $instance2 = $injector->get(ClassWithNoConstructor::class);
+
+        $this->assertInstanceOf(ClassWithNoConstructor::class, $instance);
+        $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+
+    /**
+     * @test
+     */
+    public function GivenInjector_WhenGetInstanceCalledForFactoryWithCustomMethod_ReturnsObjectFromFactory()
+    {
+        $injector = new Injector();
+        $injector->addClassResolver(new ArrayMapClassResolver([
+            ClassWithConstructor::class => new Factory(ObjectFactory::class, 'getClassWithConstructor')
+        ]));
+
+        $instance = $injector->get(ClassWithConstructor::class);
+        $instance2 = $injector->get(ClassWithConstructor::class);
+
+        $this->assertInstanceOf(ClassWithConstructor::class, $instance);
         $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
     }
 }
