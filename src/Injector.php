@@ -164,7 +164,7 @@ class Injector implements InjectorInterface
      * @return object
      * @throws ReflectionException
      */
-    private function construct(ResolvedClass $resolvedClass): object
+    private function construct(ResolvedClass $resolvedClass)
     {
         $reflectionClass = new ReflectionClass($resolvedClass->getClassName());
 
