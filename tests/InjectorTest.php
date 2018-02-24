@@ -137,6 +137,7 @@ class InjectorTest extends TestCase
         $instance2 = $injector->get(ClassWithNoConstructor::class);
 
         $this->assertInstanceOf(ClassWithNoConstructor::class, $instance);
+        $this->assertInstanceOf(ClassWithNoConstructor::class, $instance2);
         $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
     }
 
@@ -154,6 +155,7 @@ class InjectorTest extends TestCase
         $instance2 = $injector->get(ClassWithConstructor::class);
 
         $this->assertInstanceOf(ClassWithConstructor::class, $instance);
+        $this->assertInstanceOf(ClassWithConstructor::class, $instance2);
         $this->assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
     }
 }

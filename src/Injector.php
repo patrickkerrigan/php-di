@@ -73,7 +73,7 @@ class Injector implements InjectorInterface
             throw new NotFoundException("Class {$className} could not be resolved");
         }
 
-        if (!is_null($singleton = $this->getCachedSingleton($resolvedClass->getClassName()))) {
+        if (!is_null($singleton = $this->getCachedSingleton($resolvedClass))) {
             return $singleton;
         }
 
@@ -151,12 +151,16 @@ class Injector implements InjectorInterface
     }
 
     /**
-     * @param string $className
+     * @param ResolvedClass $resolvedClass
      * @return object|null
      */
-    private function getCachedSingleton(string $className)
+    private function getCachedSingleton(ResolvedClass $resolvedClass)
     {
-        return $this->cachedSingletons[$className] ?? null;
+        if (!$resolvedClass->shouldBeCached()) {
+            return null;
+        }
+
+        return $this->cachedSingletons[$resolvedClass->getClassName()] ?? null;
     }
 
     /**
