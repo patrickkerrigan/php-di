@@ -17,7 +17,7 @@ use ReflectionException;
  */
 class Injector implements InjectorInterface
 {
-    protected static $instance = null;
+    protected static $instance;
     /**
      * @var ClassResolver[]
      */
@@ -33,7 +33,7 @@ class Injector implements InjectorInterface
      */
     public static function getInstance(): self
     {
-        if (is_null(self::$instance)) {
+        if (self::$instance === null) {
             self::$instance = new static();
         }
 
@@ -56,9 +56,9 @@ class Injector implements InjectorInterface
      * @param string $className
      * @return bool
      */
-    public function has($className)
+    public function has($className): bool
     {
-        return !is_null($this->resolveClass($className));
+        return $this->resolveClass($className) !== null;
     }
 
     /**
@@ -69,11 +69,11 @@ class Injector implements InjectorInterface
     {
         $resolvedClass = $this->resolveClass($className);
 
-        if (is_null($resolvedClass)) {
+        if ($resolvedClass === null) {
             throw new NotFoundException("Class {$className} could not be resolved");
         }
 
-        if (!is_null($singleton = $this->getCachedSingleton($resolvedClass))) {
+        if (($singleton = $this->getCachedSingleton($resolvedClass)) !== null) {
             return $singleton;
         }
 
@@ -95,7 +95,7 @@ class Injector implements InjectorInterface
     private function resolveClass(string $className): ?ResolvedClass
     {
         foreach ($this->classResolvers as $resolver) {
-            if (is_null($concreteClass = $resolver->resolveConcreteClass($className))) {
+            if (($concreteClass = $resolver->resolveConcreteClass($className)) === null) {
                 continue;
             }
 
@@ -113,7 +113,7 @@ class Injector implements InjectorInterface
     {
         $constructor = $reflectionClass->getConstructor();
 
-        if (is_null($constructor)) {
+        if ($constructor === null) {
             return [];
         }
 
@@ -123,7 +123,7 @@ class Injector implements InjectorInterface
         foreach ($constructorParameters as $parameter) {
             $paramClass = $parameter->getClass();
 
-            if (is_null($paramClass)) {
+            if ($paramClass === null) {
                 break;
             }
 
@@ -139,7 +139,7 @@ class Injector implements InjectorInterface
      */
     private function getNewInstance(ResolvedClass $resolvedClass)
     {
-        if (!is_null($factoryMethod = $resolvedClass->getFactoryMethod())) {
+        if (($factoryMethod = $resolvedClass->getFactoryMethod()) !== null) {
             return $this->get($resolvedClass->getClassName())->{$factoryMethod}();
         }
 
