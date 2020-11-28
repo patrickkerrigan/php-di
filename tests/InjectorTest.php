@@ -3,6 +3,7 @@
 namespace Pkerrigan\Di;
 
 use PHPUnit\Framework\TestCase;
+use Pkerrigan\Di\Exception\NotFoundException;
 use Pkerrigan\Di\ResolvedClass\Factory;
 use Pkerrigan\Di\ResolvedClass\Prototype;
 use Pkerrigan\Di\ResolvedClass\Singleton;
@@ -40,22 +41,18 @@ class InjectorTest extends TestCase
         $this->assertTrue($injector->has(InjectorInterface::class));
     }
 
-    /**
-     * @test
-     * @expectedException \Pkerrigan\Di\Exception\NotFoundException
-     */
     public function GivenInjector_WhenGetCalledWithUnknownClass_ThrowsNotFoundException()
     {
+        $this->expectException(NotFoundException::class);
+
         $injector = new Injector();
         $injector->get('TestInterface');
     }
 
-    /**
-     * @test
-     * @expectedException \Pkerrigan\Di\Exception\InstantiationException
-     */
     public function GivenInjector_WhenGetCalledWithAbstractClass_ThrowsInstantiationException()
     {
+        $this->expectException(NotFoundException::class);
+
         $injector = new Injector();
         $injector->get(AbstractClass::class);
     }
