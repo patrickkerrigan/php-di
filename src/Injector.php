@@ -8,6 +8,7 @@ use Pkerrigan\Di\Resolver\InternalClassResolver;
 use Pkerrigan\Di\Resolver\PassthroughClassResolver;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionNamedType;
 
 /**
  * Lightweight dependency injector
@@ -121,13 +122,13 @@ class Injector implements InjectorInterface
 
         $constructorArguments = [];
         foreach ($constructorParameters as $parameter) {
-            $paramClass = $parameter->getClass();
+            $paramType = $parameter->getType();
 
-            if ($paramClass === null) {
+            if (!$paramType instanceof ReflectionNamedType) {
                 break;
             }
 
-            $constructorArguments[] = $this->get($paramClass->getName());
+            $constructorArguments[] = $this->get($paramType->getName());
         }
 
         return $constructorArguments;
