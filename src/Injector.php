@@ -124,7 +124,7 @@ class Injector implements InjectorInterface
         foreach ($constructorParameters as $parameter) {
             $paramType = $parameter->getType();
 
-            if (!$paramType instanceof ReflectionNamedType) {
+            if (!$paramType instanceof ReflectionNamedType || $paramType->isBuiltin()) {
                 break;
             }
 

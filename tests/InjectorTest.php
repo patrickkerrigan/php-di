@@ -89,6 +89,17 @@ class InjectorTest extends TestCase
     /**
      * @test
      */
+    public function GivenInjector_WhenGetCalledOnClassWithDependencyAndBuiltInType_InstantiatesClassWithDependency()
+    {
+        $injector = new Injector();
+        $classWithBuiltInType = $injector->get(ClassWithBuiltInType::class);
+        $this->assertInstanceOf(ClassWithBuiltInType::class, $classWithBuiltInType);
+        $this->assertInstanceOf(Dependency::class, $classWithBuiltInType->dependency);
+    }
+
+    /**
+     * @test
+     */
     public function GivenInjector_WhenGetInstanceCalledForSingleton_ReturnsSingletonInstance()
     {
         $injector = new Injector();
