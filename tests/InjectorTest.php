@@ -2,6 +2,7 @@
 
 namespace Pkerrigan\Di;
 
+use DateTime;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Pkerrigan\Di\Exception\InstantiationException;
@@ -192,5 +193,18 @@ class InjectorTest extends TestCase
         self::assertInstanceOf(ClassWithConstructor::class, $instance);
         self::assertInstanceOf(ClassWithConstructor::class, $instance2);
         self::assertNotEquals(spl_object_hash($instance), spl_object_hash($instance2));
+    }
+
+    #[Test]
+    public function GivenInjector_WhenGetCalledOnInternalClass_InstantiatesClassEagerly(): void
+    {
+        $injector = new Injector();
+        $object = $injector->get(DateTime::class);
+
+        self::assertInstanceOf(DateTime::class, $object);
+
+        $reflector = new ReflectionClass(DateTime::class);
+
+        self::assertFalse($reflector->isUninitializedLazyObject($object));
     }
 }

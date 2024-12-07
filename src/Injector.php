@@ -167,7 +167,7 @@ final class Injector implements InjectorInterface
             throw new InstantiationException("Unable to instantiate class '{$resolvedClass->getClassName()}'");
         }
 
-        $instance = match ($resolvedClass->isLazy()) {
+        $instance = match (($resolvedClass->isLazy() && !$reflectionClass->isInternal())) {
             true => $reflectionClass->newLazyGhost(function (object $x) use ($reflectionClass): void {
                 if (($constructor = $reflectionClass->getConstructor()) !== null) {
                     $x->__construct(...$this->constructDependencies($constructor));
