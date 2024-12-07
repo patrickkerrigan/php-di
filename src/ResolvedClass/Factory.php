@@ -10,22 +10,12 @@ use Pkerrigan\Di\ResolvedClass;
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 24/02/2018
  */
-class Factory implements ResolvedClass
+readonly class Factory implements ResolvedClass
 {
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var string
-     */
-    private $method;
-
-    public function __construct(string $name, string $method = 'get')
-    {
-        $this->name = $name;
-        $this->method = $method;
-    }
+    public function __construct(
+        private string $name,
+        private string $method = 'get'
+    ) {}
 
     public function getClassName(): string
     {
@@ -40,5 +30,10 @@ class Factory implements ResolvedClass
     public function getFactoryMethod(): ?string
     {
         return $this->method;
+    }
+
+    public function isLazy(): bool
+    {
+        return false;
     }
 }

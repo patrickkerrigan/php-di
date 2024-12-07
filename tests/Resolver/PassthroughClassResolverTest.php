@@ -2,29 +2,26 @@
 
 namespace Pkerrigan\Di\Resolver;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Pkerrigan\Di\ClassWithNoConstructor;
 use Pkerrigan\Di\ResolvedClass\Singleton;
 
 class PassthroughClassResolverTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function GivenClassName_WhenCalled_ReturnsSingletonClass()
+    #[Test]
+    public function GivenClassName_WhenCalled_ReturnsSingletonClass(): void
     {
         $resolver = new PassthroughClassResolver();
         $className = ClassWithNoConstructor::class;
-        $this->assertEquals(new Singleton($className), $resolver->resolveConcreteClass($className));
+        self::assertEquals(new Singleton($className), $resolver->resolveConcreteClass($className));
     }
 
-    /**
-     * @test
-     */
-    public function GivenInvalidClassName_WhenCalled_ReturnsNull()
+    #[Test]
+    public function GivenInvalidClassName_WhenCalled_ReturnsNull(): void
     {
         $resolver = new PassthroughClassResolver();
         $className = "InvalidClass";
-        $this->assertNull($resolver->resolveConcreteClass($className));
+        self::assertNull($resolver->resolveConcreteClass($className));
     }
 }

@@ -6,18 +6,17 @@ use Pkerrigan\Di\ClassResolver;
 use Pkerrigan\Di\ResolvedClass;
 use Pkerrigan\Di\ResolvedClass\Singleton;
 
+use function array_map;
+
 /**
  * Lightweight dependency injector
  * 3 Clause BSD Licence
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 13/03/16
  */
-class ArrayMapClassResolver implements ClassResolver
+final readonly class ArrayMapClassResolver implements ClassResolver
 {
-    /**
-     * @var array
-     */
-    private $mapping;
+    private array $mapping;
 
     /**
      * ArrayMapClassResolver constructor.

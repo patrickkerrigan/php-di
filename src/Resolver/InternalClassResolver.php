@@ -15,9 +15,9 @@ use Psr\Container\ContainerInterface;
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 13/03/16
  */
-class InternalClassResolver implements ClassResolver
+final readonly class InternalClassResolver implements ClassResolver
 {
-    private $internalMappings;
+    private array $internalMappings;
 
     public function __construct()
     {

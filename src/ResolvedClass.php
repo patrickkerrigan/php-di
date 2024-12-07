@@ -23,6 +23,12 @@ interface ResolvedClass
     public function shouldBeCached(): bool;
 
     /**
+     * Should this result be lazy
+     * @return bool
+     */
+    public function isLazy(): bool;
+
+    /**
      * Get the method to call on this class to return a real instance
      * @return null|string
      */

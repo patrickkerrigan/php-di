@@ -10,7 +10,7 @@ use Pkerrigan\Di\ResolvedClass;
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 24/02/2018
  */
-abstract class AbstractInstance implements ResolvedClass
+abstract readonly class AbstractInstance implements ResolvedClass
 {
     /**
      * Get the method to call on this class to return a real instance

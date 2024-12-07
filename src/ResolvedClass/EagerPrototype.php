@@ -6,9 +6,9 @@ namespace Pkerrigan\Di\ResolvedClass;
  * Lightweight dependency injector
  * 3 Clause BSD Licence
  * @author Patrick Kerrigan (patrickkerrigan.uk)
- * @since 13/03/16
+ * @since 07/12/24
  */
-readonly class Prototype extends AbstractLazyInstance
+readonly class EagerPrototype extends AbstractEagerInstance
 {
     public function __construct(private string $name)
     {}

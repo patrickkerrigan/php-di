@@ -2,6 +2,7 @@
 
 namespace Pkerrigan\Di\ResolvedClass;
 
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Pkerrigan\Di\ObjectFactory;
 
@@ -13,14 +14,18 @@ use Pkerrigan\Di\ObjectFactory;
 class FactoryTest extends TestCase
 {
     /**
-     * @test
      * Currently there's no support for caching the return value of factories,
      * so this should always be false
      */
-    public function GivenFactory_WhenShouldBeCachedCalled_ReturnsFalse()
+    #[Test]
+    public function GivenFactory_WhenShouldBeCachedCalled_ReturnsFalse(): void
     {
-        $factory = new Factory(ObjectFactory::class);
+        self::assertFalse(new Factory(ObjectFactory::class)->shouldBeCached());
+    }
 
-        $this->assertFalse($factory->shouldBeCached());
+    #[Test]
+    public function GivenFactory_WhenIsLazyCalled_ReturnsFalse(): void
+    {
+        self::assertFalse(new Factory(ObjectFactory::class)->isLazy());
     }
 }

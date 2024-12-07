@@ -8,17 +8,10 @@ namespace Pkerrigan\Di\ResolvedClass;
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 13/03/16
  */
-class Singleton extends AbstractInstance
+readonly class Singleton extends AbstractLazyInstance
 {
-    /**
-     * @var string
-     */
-    private $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
-    }
+    public function __construct(private string $name)
+    {}
 
     public function getClassName(): string
     {

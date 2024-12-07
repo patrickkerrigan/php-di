@@ -8,7 +8,9 @@ use Pkerrigan\Di\Resolver\InternalClassResolver;
 use Pkerrigan\Di\Resolver\PassthroughClassResolver;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use ReflectionNamedType;
+use SplStack;
 
 /**
  * Lightweight dependency injector
@@ -16,26 +18,27 @@ use ReflectionNamedType;
  * @author Patrick Kerrigan (patrickkerrigan.uk)
  * @since 13/03/16
  */
-class Injector implements InjectorInterface
+final class Injector implements InjectorInterface
 {
-    protected static $instance;
+    private static ?self $instance = null;
+
     /**
-     * @var ClassResolver[]
+     * @var SplStack<ClassResolver>
      */
-    private $classResolvers;
+    private SplStack $classResolvers;
     /**
-     * @var array
+     * @var object[]
      */
-    private $cachedSingletons;
+    private array $cachedSingletons;
 
     /**
      * Get an instance of this class
-     * @return static
+     * @return self
      */
     public static function getInstance(): self
     {
         if (self::$instance === null) {
-            self::$instance = new static();
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -43,10 +46,9 @@ class Injector implements InjectorInterface
 
     public function __construct()
     {
-        $this->classResolvers = [
-            new InternalClassResolver(),
-            new PassthroughClassResolver()
-        ];
+        $this->classResolvers = new SplStack();
+        $this->classResolvers->push(new PassthroughClassResolver());
+        $this->classResolvers->push(new InternalClassResolver());
 
         $this->cachedSingletons = [
             static::class => $this
@@ -54,24 +56,24 @@ class Injector implements InjectorInterface
     }
 
     /**
-     * @param string $className
+     * @param string $id
      * @return bool
      */
-    public function has($className): bool
+    public function has(string $id): bool
     {
-        return $this->resolveClass($className) !== null;
+        return $this->resolveClass($id) !== null;
     }
 
     /**
-     * @param string $className
+     * @param string $id
      * @return object
      */
-    public function get($className)
+    public function get(string $id): object
     {
-        $resolvedClass = $this->resolveClass($className);
+        $resolvedClass = $this->resolveClass($id);
 
         if ($resolvedClass === null) {
-            throw new NotFoundException("Class {$className} could not be resolved");
+            throw new NotFoundException("Class $id could not be resolved");
         }
 
         if (($singleton = $this->getCachedSingleton($resolvedClass)) !== null) {
@@ -86,7 +88,7 @@ class Injector implements InjectorInterface
      */
     public function addClassResolver(ClassResolver $resolver): void
     {
-        array_unshift($this->classResolvers, $resolver);
+        $this->classResolvers->push($resolver);
     }
 
     /**
@@ -96,28 +98,16 @@ class Injector implements InjectorInterface
     private function resolveClass(string $className): ?ResolvedClass
     {
         foreach ($this->classResolvers as $resolver) {
-            if (($concreteClass = $resolver->resolveConcreteClass($className)) === null) {
-                continue;
+            if (($concreteClass = $resolver->resolveConcreteClass($className)) !== null) {
+                return $concreteClass;
             }
-
-            return $concreteClass;
         }
 
         return null;
     }
 
-    /**
-     * @param $reflectionClass
-     * @return array
-     */
-    private function constructDependencies(ReflectionClass $reflectionClass): array
+    private function constructDependencies(ReflectionMethod $constructor): array
     {
-        $constructor = $reflectionClass->getConstructor();
-
-        if ($constructor === null) {
-            return [];
-        }
-
         $constructorParameters = $constructor->getParameters();
 
         $constructorArguments = [];
@@ -138,7 +128,7 @@ class Injector implements InjectorInterface
      * @param ResolvedClass $resolvedClass
      * @return object
      */
-    private function getNewInstance(ResolvedClass $resolvedClass)
+    private function getNewInstance(ResolvedClass $resolvedClass): object
     {
         if (($factoryMethod = $resolvedClass->getFactoryMethod()) !== null) {
             return $this->get($resolvedClass->getClassName())->{$factoryMethod}();
@@ -146,7 +136,7 @@ class Injector implements InjectorInterface
 
         try {
             return $this->construct($resolvedClass);
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException) {
             throw new InstantiationException("Unable to load class '{$resolvedClass->getClassName()}'");
         }
     }
@@ -155,7 +145,7 @@ class Injector implements InjectorInterface
      * @param ResolvedClass $resolvedClass
      * @return object|null
      */
-    private function getCachedSingleton(ResolvedClass $resolvedClass)
+    private function getCachedSingleton(ResolvedClass $resolvedClass): ?object
     {
         if (!$resolvedClass->shouldBeCached()) {
             return null;
@@ -169,7 +159,7 @@ class Injector implements InjectorInterface
      * @return object
      * @throws ReflectionException
      */
-    private function construct(ResolvedClass $resolvedClass)
+    private function construct(ResolvedClass $resolvedClass): object
     {
         $reflectionClass = new ReflectionClass($resolvedClass->getClassName());
 
@@ -177,9 +167,20 @@ class Injector implements InjectorInterface
             throw new InstantiationException("Unable to instantiate class '{$resolvedClass->getClassName()}'");
         }
 
-        $dependencies = $this->constructDependencies($reflectionClass);
+        $instance = match ($resolvedClass->isLazy()) {
+            true => $reflectionClass->newLazyGhost(function (object $x) use ($reflectionClass): void {
+                if (($constructor = $reflectionClass->getConstructor()) !== null) {
+                    $x->__construct(...$this->constructDependencies($constructor));
+                }
+            }),
 
-        $instance = $reflectionClass->newInstanceArgs($dependencies);
+            false => $reflectionClass->newInstanceArgs(
+                (($constructor = $reflectionClass->getConstructor()) !== null)
+                    ? $this->constructDependencies($constructor)
+                    : []
+            )
+        };
+
         if ($resolvedClass->shouldBeCached()) {
             $this->cachedSingletons[$resolvedClass->getClassName()] = $instance;
         }
